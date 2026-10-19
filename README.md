@@ -16,4 +16,4 @@ Repository 的 Settings → Pages → Build and deployment → Source 選擇 **G
 預期網址：https://maoniu1018-star.github.io/cn-creative-studio/
 
 ## 作品圖片
-首頁目前預留 `assets/portfolio-page-XX.jpg` 路徑。正式作品圖片尚需上傳至 `assets/` 資料夾，完成後才會顯示實際作品縮圖。
+請將 `CN_Creative_Studio_作品集網站圖片素材.zip` 上傳到 Repository 根目錄，並命名為 `portfolio-assets.zip`。GitHub Actions 會在部署時自動解壓縮到 `assets/`，圖片即可顯示。
