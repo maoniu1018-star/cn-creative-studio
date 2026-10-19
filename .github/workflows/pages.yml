@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -30,7 +30,14 @@ jobs:
         run: |
           if [ -f cn-creative-studio-highres-replacements.zip ]; then
             unzip -o cn-creative-studio-highres-replacements.zip -d .
-            rm -f cn-creative-studio-highres-replacements.zip
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets/work-06.jpg assets/work-07.jpg assets/work-11.jpg assets/work-13.jpg assets/work-17.jpg assets/work-20.jpg
+            git rm -f cn-creative-studio-highres-replacements.zip
+            if ! git diff --cached --quiet; then
+              git commit -m "Apply confirmed high-resolution portfolio replacements"
+              git push origin HEAD:main
+            fi
           fi
       - name: Configure Pages
         uses: actions/configure-pages@v5
