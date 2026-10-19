@@ -9,13 +9,11 @@
 - AI 視覺與動態內容
 - Instagram 與 Linkbio 合作入口
 
-## 發布設定
-1. 開啟 Repository 的 Settings → Pages。
-2. 在 Build and deployment 的 Source 選擇 Deploy from a branch。
-3. Branch 選 main，資料夾選 /(root)，按 Save。
-4. 等待 GitHub Pages 部署完成後，按 Visit site。
+## 發布方式
+Repository 的 Settings → Pages → Build and deployment → Source 選擇 **GitHub Actions**。
+本專案已加入 `.github/workflows/pages.yml`，推送至 `main` 時會自動執行部署。
 
 預期網址：https://maoniu1018-star.github.io/cn-creative-studio/
 
 ## 作品圖片
-首頁已預留 assets/portfolio-page-XX.jpg 圖片路徑。請將網站 ZIP 內的 assets 資料夾上傳至本 Repository 根目錄，作品縮圖才會顯示為正式作品圖片。
+首頁目前預留 `assets/portfolio-page-XX.jpg` 路徑。正式作品圖片尚需上傳至 `assets/` 資料夾，完成後才會顯示實際作品縮圖。
