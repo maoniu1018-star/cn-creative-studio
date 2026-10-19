@@ -26,6 +26,11 @@ jobs:
       - name: Extract portfolio artwork archive
         run: |
           if [ -f portfolio-assets.zip ]; then unzip -o portfolio-assets.zip -d .; fi
+      - name: Apply confirmed high-resolution replacements
+        run: |
+          if [ -f cn-creative-studio-highres-replacements.zip ]; then
+            unzip -o cn-creative-studio-highres-replacements.zip -d .
+          fi
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website
