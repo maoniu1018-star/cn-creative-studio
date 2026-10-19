@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Extract portfolio artwork archive
+        run: |
+          if [ -f portfolio-assets.zip ]; then unzip -o portfolio-assets.zip -d .; fi
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website
