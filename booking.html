@@ -14,21 +14,53 @@
 <form id="bookingForm">
 <div class="field"><label for="name">稱呼 *</label><input id="name" required placeholder="怎麼稱呼您？"></div>
 <div class="grid"><div class="field"><label for="contact">聯絡方式 *</label><input id="contact" required placeholder="LINE 名稱或電話"></div><div class="field"><label for="service">需求項目 *</label><select id="service" required><option value="">請選擇</option><option>社群貼文／活動宣傳圖</option><option>AI 商品視覺／廣告圖</option><option>短影音／動態廣告</option><option>遊戲廣告／系列視覺</option><option>Logo／名片／封面</option><option>其他設計需求</option></select></div></div>
+<div class="grid"><div class="field"><label for="bookingDate">預約日期 *</label><input id="bookingDate" type="date" required><div class="hint">週一至週五，09:00–18:00，每小時一個時段</div></div><div class="field"><label for="bookingTime">預約時間 *</label><select id="bookingTime" required><option value="">請先選擇日期</option></select></div></div>
 <div class="grid"><div class="field"><label for="budget">預算範圍</label><select id="budget"><option>尚未確定，請協助評估</option><option>NT$500–1,000</option><option>NT$1,000–3,000</option><option>NT$3,000–5,000</option><option>NT$5,000 以上</option></select></div><div class="field"><label for="deadline">希望完成日期</label><input id="deadline" type="date"></div></div>
 <div class="field"><label for="detail">設計需求說明 *</label><textarea id="detail" required placeholder="例如：需要幾張圖、使用平台、尺寸、文案或其他想法"></textarea></div>
 <div class="field"><label for="reference">參考圖片／作品連結（選填）</label><input id="reference" placeholder="可貼上圖片網址或參考連結"></div>
-<button class="btn" type="submit">整理需求並前往 LINE ↗</button>
-<div class="note">送出後會開啟 LINE 官方帳號；請將已複製的需求內容貼上傳送。</div>
+<button class="btn" id="submitBtn" type="submit">送出預約資料</button>
+<div class="note">送出後會登記預約時段（待付款）；請再透過 LINE 聯絡付款事宜。</div>
 </form><div class="result" id="result" role="status"></div></main>
 <footer>© 2026 CN Creative Studio</footer></div>
 <script>
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzDc6FuN6LOzpp1zkuKKDLiSG28socypUh7jtjq05pYrVZRSUPEmX8ZjzRK9uG3IlXP/exec';
+const LINE_URL='https://lin.ee/73F8KnE';
 const form=document.getElementById('bookingForm');
+const dateInput=document.getElementById('bookingDate');
+const timeSelect=document.getElementById('bookingTime');
+const submitBtn=document.getElementById('submitBtn');
+const box=document.getElementById('result');
+const pad=n=>String(n).padStart(2,'0');
+const now=new Date();
+dateInput.min=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+dateInput.addEventListener('change',()=>{
+  timeSelect.innerHTML='<option value="">請選擇時段</option>';
+  if(!dateInput.value)return;
+  const d=new Date(dateInput.value+'T12:00:00');
+  if(d.getDay()===0||d.getDay()===6){
+    timeSelect.innerHTML='<option value="">週末不開放預約</option>';
+    dateInput.setCustomValidity('目前僅開放週一至週五預約');
+    dateInput.reportValidity();return;
+  }
+  dateInput.setCustomValidity('');
+  for(let h=9;h<19;h++){const t=pad(h)+':00';timeSelect.add(new Option(t,t));}
+});
 form.addEventListener('submit',async e=>{
- e.preventDefault();
- const v=id=>document.getElementById(id).value.trim();
- const msg=['【CN Creative Studio｜設計需求】','稱呼：'+v('name'),'聯絡方式：'+v('contact'),'需求項目：'+v('service'),'預算：'+v('budget'),'希望完成日期：'+(v('deadline')||'未指定'),'需求說明：'+v('detail'),'參考連結：'+(v('reference')||'無')].join('\n');
- const box=document.getElementById('result');box.textContent='需求內容已整理。若沒有自動複製，請長按下方文字複製，再貼到 LINE 傳送。\n\n'+msg;box.classList.add('show');
- try{await navigator.clipboard.writeText(msg);box.textContent='已複製需求內容！進入 LINE 後，請在聊天輸入框貼上並傳送。\n\n'+msg;}catch(err){}
- window.location.href='https://lin.ee/73F8KnE';
+  e.preventDefault();
+  const v=id=>document.getElementById(id).value.trim();
+  const date=v('bookingDate'),time=v('bookingTime');
+  if(!date||!time){box.textContent='請選擇預約日期與時間。';box.classList.add('show');return;}
+  const data={name:v('name'),contact:v('contact'),service:v('service'),date,time,detail:v('detail'),budget:v('budget'),deadline:v('deadline'),paymentMethod:'銀行轉帳／LINE Pay'};
+  submitBtn.disabled=true;submitBtn.textContent='正在送出…';
+  box.textContent='正在登記預約資料，請勿關閉頁面。';box.classList.add('show');
+  try{
+    const response=await fetch(SCRIPT_URL,{method:'POST',body:new URLSearchParams(data)});
+    const result=await response.json();
+    if(!result.success)throw new Error(result.message||'預約登記失敗');
+    box.innerHTML='預約資料已登記，編號：'+result.bookingId+'<br>目前狀態：待付款。付款完成前，請勿視為正式確認。<br><br><a href="'+LINE_URL+'" target="_blank" rel="noopener">前往 LINE 官方帳號聯絡付款</a>';
+    form.reset();timeSelect.innerHTML='<option value="">請先選擇日期</option>';
+  }catch(err){
+    box.textContent='目前無法確認是否登記成功：'+err.message+'。請先檢查試算表是否新增資料，避免重複送出；也可透過 LINE 聯絡。';
+  }finally{submitBtn.disabled=false;submitBtn.textContent='送出預約資料';}
 });
 </script></body></html>
