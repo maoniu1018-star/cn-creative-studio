@@ -12,7 +12,7 @@
 <body>
 <header class="top"><div class="wrap"><div class="brand">CN Booking Studio<small>ONLINE BOOKING · BUSINESS TOOLS</small></div></div></header>
 <main class="wrap">
-<section class="intro"><div class="eyebrow">MULTI-STORE BOOKING PLATFORM</div><h1>店家登入與註冊</h1><div class="muted">管理你的店家資料，開始使用線上預約工具。</div></section>
+<section class="intro"><div class="eyebrow">MULTI-STORE BOOKING PLATFORM</div><h1>平台管理員登入</h1><div class="muted">由你統一管理平台店家；店家客戶註冊功能將於正式銷售時再開放。</div></section>
 <section id="configPanel" class="panel">
 <h2>首次設定連線</h2>
 <p class="muted">輸入 Supabase 專案網址及公開的 anon／publishable key。這不是 service_role secret key。</p>
@@ -23,8 +23,7 @@
 <div class="small">連線資訊只暫存在目前瀏覽器分頁工作階段，不會寫入網站原始碼。</div>
 </section>
 <section id="authPanel" class="panel hidden">
-<h2>帳號</h2>
-<div class="tabs"><button class="btn active" data-mode="login">登入</button><button class="btn" data-mode="signup">建立帳號</button></div>
+<h2>管理員帳號</h2>
 <form id="authForm">
 <div class="field"><label for="email">電子郵件</label><input id="email" type="email" required autocomplete="email"></div>
 <div class="field"><label for="password">密碼</label><input id="password" type="password" required minlength="8" autocomplete="current-password"></div>
@@ -49,18 +48,18 @@
 <footer>© 2026 CN Booking Studio</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-let client=null,mode='login';
+let client=null;
 const $=id=>document.getElementById(id);
 function message(id,text,type=''){const el=$(id);el.textContent=text;el.className='msg show '+type}
-function setMode(next){mode=next;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));$('authBtn').textContent=mode==='login'?'登入':'建立帳號';$('password').autocomplete=mode==='login'?'current-password':'new-password';$('authMsg').className='msg'}
+function setMode(){ $('authMsg').className='msg'}
 function showAuth(){ $('configPanel').classList.add('hidden');$('authPanel').classList.remove('hidden');$('businessPanel').classList.add('hidden')}
 function showBusinesses(){ $('configPanel').classList.add('hidden');$('authPanel').classList.add('hidden');$('businessPanel').classList.remove('hidden');loadBusinesses()}
 async function connect(){const btn=$('connectBtn');const url=$('projectUrl').value.trim().replace(/\/$/,'');const key=$('anonKey').value.trim();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)||!key){message('configMsg','請確認 Supabase 專案網址及公開 Publishable／anon key。不可使用 service_role 或 Secret key。','error');return}if(!window.supabase){message('configMsg','Supabase 連線程式沒有載入。請確認網路可連線後重新整理頁面。','error');return}btn.disabled=true;btn.textContent='正在測試連線…';try{client=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});const {data,error}=await client.auth.getSession();if(error)throw error;sessionStorage.setItem('cn_sb_url',url);sessionStorage.setItem('cn_sb_key',key);message('configMsg','Supabase 連線成功。'+(data.session?'已找到登入狀態。':'請使用已建立的電子郵件與密碼登入。'),'ok');if(data.session)showBusinesses();else showAuth()}catch(e){client=null;const detail=e&&e.message?e.message:String(e);message('configMsg','連線測試失敗：'+detail+'。請核對 Project URL 與公開 key 是否來自同一個 Supabase 專案，並確認專案未暫停。','error')}finally{btn.disabled=false;btn.textContent='連線並繼續'}}
 $('connectBtn').addEventListener('click',connect);
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-$('authForm').addEventListener('submit',async e=>{e.preventDefault();if(!client)return;const email=$('email').value.trim(),password=$('password').value;const btn=$('authBtn');btn.disabled=true;try{if(mode==='signup'){const {data,error}=await client.auth.signUp({email,password});if(error)throw error;if(!data.session){message('authMsg','註冊成功！請到電子郵件收取確認信，完成驗證後再回來登入。','ok')}else{message('authMsg','帳號建立成功。','ok');showBusinesses()}}else{const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;showBusinesses()}}catch(err){message('authMsg',err.message||'操作失敗，請稍後再試。','error')}finally{btn.disabled=false}});
-async function loadBusinesses(){const list=$('businessList');list.textContent='讀取店家資料中…';const {data,error}=await client.from('businesses').select('id,name,slug,description').order('created_at',{ascending:false});if(error){list.textContent='讀取失敗：'+error.message;return}list.innerHTML='';if(!data.length){const p=document.createElement('p');p.className='muted';p.textContent='目前尚未建立店家，請在下方建立第一家店。';list.append(p);return}data.forEach(b=>{const item=document.createElement('div');item.className='business';const info=document.createElement('div');const strong=document.createElement('strong');strong.textContent=b.name;const small=document.createElement('div');small.className='small';small.textContent='網址代稱：'+b.slug;info.append(strong,small);const open=document.createElement('button');open.className='btn primary';open.textContent='開啟管理';open.addEventListener('click',()=>location.href='./platform-dashboard.html?business='+encodeURIComponent(b.id));item.append(info,open);list.append(item)})}
-$('businessForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('createBusinessBtn');btn.disabled=true;try{const {data,error}=await client.rpc('create_business_for_current_user',{p_name:$('businessName').value.trim(),p_slug:$('businessSlug').value.trim().toLowerCase(),p_description:$('businessDescription').value.trim()});if(error)throw error;message('businessMsg','店家建立成功！','ok');$('businessForm').reset();await loadBusinesses()}catch(err){message('businessMsg',err.message||'建立失敗','error')}finally{btn.disabled=false}});
+
+$('authForm').addEventListener('submit',async e=>{e.preventDefault();if(!client)return;const email=$('email').value.trim(),password=$('password').value;const btn=$('authBtn');btn.disabled=true;try{const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;const {data:admin,error:ae}=await client.rpc('is_platform_admin');if(ae)throw ae;if(!admin)throw new Error('此帳號尚未設定為平台管理員，請確認管理員權限。');showBusinesses()}catch(err){message('authMsg',err.message||'登入失敗，請稍後再試。','error')}finally{btn.disabled=false}});
+async function loadBusinesses(){const list=$('businessList');list.textContent='讀取店家資料中…';const {data,error}=await client.rpc('admin_list_businesses');if(error){list.textContent='讀取失敗：'+error.message;return}list.innerHTML='';if(!data.length){const p=document.createElement('p');p.className='muted';p.textContent='目前尚未建立店家，請在下方建立第一家店。';list.append(p);return}data.forEach(b=>{const item=document.createElement('div');item.className='business';const info=document.createElement('div');const strong=document.createElement('strong');strong.textContent=b.name;const small=document.createElement('div');small.className='small';small.textContent='網址代稱：'+b.slug;info.append(strong,small);const open=document.createElement('button');open.className='btn primary';open.textContent='開啟管理';open.addEventListener('click',()=>location.href='./platform-dashboard.html?business='+encodeURIComponent(b.id));item.append(info,open);list.append(item)})}
+$('businessForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('createBusinessBtn');btn.disabled=true;try{const {data,error}=await client.rpc('admin_create_business',{p_name:$('businessName').value.trim(),p_slug:$('businessSlug').value.trim().toLowerCase(),p_description:$('businessDescription').value.trim()});if(error)throw error;message('businessMsg','店家建立成功！','ok');$('businessForm').reset();await loadBusinesses()}catch(err){message('businessMsg',err.message||'建立失敗','error')}finally{btn.disabled=false}});
 $('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();showAuth()});
 (async()=>{const url=sessionStorage.getItem('cn_sb_url'),key=sessionStorage.getItem('cn_sb_key');if(url&&key){$('projectUrl').value=url;$('anonKey').value=key;connect()}})();
 </script>
