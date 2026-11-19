@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fbf7f1">
+<title>CN Booking Studio｜店家登入</title>
+<style>
+:root{--ink:#382922;--muted:#806f63;--cream:#fbf7f1;--paper:#fffdf9;--rose:#efd5ce;--gold:#b8955c;--line:#e8dcd0;--green:#53765e;--red:#a85b51}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;line-height:1.6}button,input,textarea{font:inherit}.wrap{width:min(900px,calc(100% - 30px));margin:auto}.top{padding:20px 0;border-bottom:1px solid var(--line)}.brand{font:700 21px Georgia,serif}.brand small{display:block;font:10px sans-serif;letter-spacing:.2em;color:var(--muted)}main{padding:36px 0 60px}.intro{margin-bottom:22px}.eyebrow{font-size:11px;letter-spacing:.2em;color:var(--gold)}h1{font:700 clamp(28px,5vw,40px)/1.2 Georgia,"Noto Serif TC",serif;margin:8px 0}h2{font-size:20px;margin:0 0 14px}.muted{color:var(--muted)}.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px;margin:16px 0;box-shadow:0 10px 28px #50332109}.field{margin:13px 0}.field label{display:block;font-weight:650;font-size:14px;margin-bottom:6px}input,textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px;background:white;color:var(--ink);min-height:46px}textarea{min-height:76px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{border:1px solid var(--line);border-radius:999px;padding:11px 17px;background:white;color:var(--ink);cursor:pointer}.btn.primary{background:var(--ink);color:white;border-color:var(--ink)}.btn:disabled{opacity:.55;cursor:wait}.tabs{display:flex;gap:8px;margin-bottom:15px}.tabs .active{background:var(--ink);color:white}.msg{display:none;margin-top:14px;padding:12px 14px;border-radius:12px;background:#f6ebe3;font-size:14px}.msg.show{display:block}.msg.error{background:#f8e8e5;color:var(--red)}.msg.ok{background:#eaf1e8;color:var(--green)}.hidden{display:none!important}.business-list{display:grid;gap:10px}.business{border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}.small{font-size:12px;color:var(--muted)}footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}@media(max-width:600px){.grid{grid-template-columns:1fr}.panel{padding:17px}.business{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand">CN Booking Studio<small>ONLINE BOOKING · BUSINESS TOOLS</small></div></div></header>
+<main class="wrap">
+<section class="intro"><div class="eyebrow">MULTI-STORE BOOKING PLATFORM</div><h1>店家登入與註冊</h1><div class="muted">管理你的店家資料，開始使用線上預約工具。</div></section>
+<section id="configPanel" class="panel">
+<h2>首次設定連線</h2>
+<p class="muted">輸入 Supabase 專案網址及公開的 anon／publishable key。這不是 service_role secret key。</p>
+<div class="field"><label for="projectUrl">Project URL</label><input id="projectUrl" value="https://hfkyvvyrxauqgoridkmqk.supabase.co" autocomplete="url"></div>
+<div class="field"><label for="anonKey">Publishable key／anon public key</label><textarea id="anonKey" placeholder="貼上 Supabase 專案的公開 key（不要貼 service_role 或 secret key）"></textarea></div>
+<button id="connectBtn" class="btn primary">連線並繼續</button>
+<div id="configMsg" class="msg"></div>
+<div class="small">連線資訊只暫存在目前瀏覽器分頁工作階段，不會寫入網站原始碼。</div>
+</section>
+<section id="authPanel" class="panel hidden">
+<h2>帳號</h2>
+<div class="tabs"><button class="btn active" data-mode="login">登入</button><button class="btn" data-mode="signup">建立帳號</button></div>
+<form id="authForm">
+<div class="field"><label for="email">電子郵件</label><input id="email" type="email" required autocomplete="email"></div>
+<div class="field"><label for="password">密碼</label><input id="password" type="password" required minlength="8" autocomplete="current-password"></div>
+<button id="authBtn" class="btn primary" type="submit">登入</button>
+</form>
+<div id="authMsg" class="msg"></div>
+</section>
+<section id="businessPanel" class="panel hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2>我的店家</h2><button id="logoutBtn" class="btn">登出</button></div>
+<div id="businessList" class="business-list"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+<h2>建立新店家</h2>
+<form id="businessForm">
+<div class="grid"><div class="field"><label for="businessName">店家名稱</label><input id="businessName" required maxlength="80" placeholder="例如：CN 示範工作室"></div><div class="field"><label for="businessSlug">專屬網址代稱（英文）</label><input id="businessSlug" required minlength="3" maxlength="40" pattern="[A-Za-z0-9][A-Za-z0-9-]{2,39}" placeholder="例如：cn-studio"></div></div>
+<div class="field"><label for="businessDescription">店家簡介（選填）</label><textarea id="businessDescription" maxlength="500" placeholder="簡單介紹你的店家"></textarea></div>
+<button id="createBusinessBtn" class="btn primary" type="submit">建立店家</button>
+</form>
+<div id="businessMsg" class="msg"></div>
+</section>
+<section class="panel"><div class="small">安全提醒：請勿將 Supabase service_role key、資料庫密碼或其他 Secret 貼到公開網站或傳送給任何人。</div></section>
+</main>
+<footer>© 2026 CN Booking Studio</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let client=null,mode='login';
+const $=id=>document.getElementById(id);
+function message(id,text,type=''){const el=$(id);el.textContent=text;el.className='msg show '+type}
+function setMode(next){mode=next;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));$('authBtn').textContent=mode==='login'?'登入':'建立帳號';$('password').autocomplete=mode==='login'?'current-password':'new-password';$('authMsg').className='msg'}
+function showAuth(){ $('configPanel').classList.add('hidden');$('authPanel').classList.remove('hidden');$('businessPanel').classList.add('hidden')}
+function showBusinesses(){ $('configPanel').classList.add('hidden');$('authPanel').classList.add('hidden');$('businessPanel').classList.remove('hidden');loadBusinesses()}
+function connect(){const url=$('projectUrl').value.trim().replace(/\/$/,'');const key=$('anonKey').value.trim();if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)||!key){message('configMsg','請確認 Project URL 與公開 Publishable／anon key。','error');return}if(!window.supabase){message('configMsg','連線套件載入失敗，請重新整理頁面。','error');return}try{client=window.supabase.createClient(url,key);sessionStorage.setItem('cn_sb_url',url);sessionStorage.setItem('cn_sb_key',key);message('configMsg','連線設定完成，正在檢查登入狀態…','ok');client.auth.getSession().then(({data})=>data.session?showBusinesses():showAuth())}catch(e){message('configMsg','連線設定失敗：'+e.message,'error')}}
+$('connectBtn').addEventListener('click',connect);
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+$('authForm').addEventListener('submit',async e=>{e.preventDefault();if(!client)return;const email=$('email').value.trim(),password=$('password').value;const btn=$('authBtn');btn.disabled=true;try{if(mode==='signup'){const {data,error}=await client.auth.signUp({email,password});if(error)throw error;if(!data.session){message('authMsg','註冊成功！請到電子郵件收取確認信，完成驗證後再回來登入。','ok')}else{message('authMsg','帳號建立成功。','ok');showBusinesses()}}else{const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;showBusinesses()}}catch(err){message('authMsg',err.message||'操作失敗，請稍後再試。','error')}finally{btn.disabled=false}});
+async function loadBusinesses(){const list=$('businessList');list.textContent='讀取店家資料中…';const {data,error}=await client.from('businesses').select('id,name,slug,description').order('created_at',{ascending:false});if(error){list.textContent='讀取失敗：'+error.message;return}list.innerHTML='';if(!data.length){const p=document.createElement('p');p.className='muted';p.textContent='目前尚未建立店家，請在下方建立第一家店。';list.append(p);return}data.forEach(b=>{const item=document.createElement('div');item.className='business';const info=document.createElement('div');const strong=document.createElement('strong');strong.textContent=b.name;const small=document.createElement('div');small.className='small';small.textContent='網址代稱：'+b.slug;info.append(strong,small);const open=document.createElement('button');open.className='btn primary';open.textContent='開啟管理';open.addEventListener('click',()=>location.href='./platform-dashboard.html?business='+encodeURIComponent(b.id));item.append(info,open);list.append(item)})}
+$('businessForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('createBusinessBtn');btn.disabled=true;try{const {data,error}=await client.rpc('create_business_for_current_user',{p_name:$('businessName').value.trim(),p_slug:$('businessSlug').value.trim().toLowerCase(),p_description:$('businessDescription').value.trim()});if(error)throw error;message('businessMsg','店家建立成功！','ok');$('businessForm').reset();await loadBusinesses()}catch(err){message('businessMsg',err.message||'建立失敗','error')}finally{btn.disabled=false}});
+$('logoutBtn').addEventListener('click',async()=>{await client.auth.signOut();showAuth()});
+(async()=>{const url=sessionStorage.getItem('cn_sb_url'),key=sessionStorage.getItem('cn_sb_key');if(url&&key){$('projectUrl').value=url;$('anonKey').value=key;connect()}})();
+</script>
+</body></html>
